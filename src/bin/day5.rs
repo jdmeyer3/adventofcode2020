@@ -86,7 +86,7 @@ fn main() {
 
     let start = Instant::now();
 
-    let input = std::fs::read_to_string("./src/input").unwrap();
+    let input = std::fs::read_to_string("input/day5").unwrap();
     let passports = input.lines().map(get_passport).collect::<Vec<_>>();
 
     let max = passports.iter().max().unwrap();
