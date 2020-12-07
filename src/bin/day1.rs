@@ -1,6 +1,7 @@
 use itertools::{Itertools, Combinations};
 use std::borrow::Borrow;
 
+// TODO: not generate the combinations then solve the issue. It would be better to break the the moment the sum is found.
 fn main() {
     let input = std::fs::read_to_string("input/day1").unwrap();
     let expenses = input.lines().map(|e| e.parse::<i32>().unwrap()).collect::<Vec<_>>();
