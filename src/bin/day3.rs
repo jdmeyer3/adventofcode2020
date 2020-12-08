@@ -1,6 +1,5 @@
 // . = no tree  ;  # = tree
-
-
+use std::time::{Duration, Instant};
 
 struct Treeline(Vec<bool>);
 
@@ -10,7 +9,7 @@ impl Treeline {
         let mut current_pos = 0;
         let mut trees_hit = 0;
 
-        while current_pos < self.0.len() {
+        loop {
             let slope_row = current_pos / slope_size;
             // let slope_start_idx = slope_row * slope_size;
             let slope_end_idx = (slope_row + 1) * slope_size - 1;
@@ -25,7 +24,11 @@ impl Treeline {
             // y axis
             current_pos = current_pos + (slope_size * y_axis);
 
-            if self.0.get(current_pos).is_some() && *self.0.get(current_pos).unwrap() {
+            if current_pos > self.0.len() {
+                break
+            }
+
+            if self.0[current_pos] {
                 trees_hit += 1;
             }
         }
@@ -33,7 +36,9 @@ impl Treeline {
     }
 }
 
+//TODO: initialize vec better instead of extending
 fn generate_treemap(trees: String) -> Treeline {
+    // let num_rows = trees.lines().count();
     let mut treeline: Vec<bool> = Vec::new();
     for t in trees.lines() {
         treeline.extend_from_slice(&t.chars().map(|t| match t {
@@ -46,6 +51,8 @@ fn generate_treemap(trees: String) -> Treeline {
 }
 
 fn main() {
+    let start = Instant::now();
+
     let input = std::fs::read_to_string("input/day3").unwrap();
     let g = generate_treemap(input);
     //pt1
@@ -59,4 +66,6 @@ fn main() {
     let fifth = g.navigate_treeline(31, 1, 2);
 
     println!("# of trees hit: {}", first * second * third * fourth * fifth);
+    println!("time to completion: {:?}", start.elapsed());
+
 }
