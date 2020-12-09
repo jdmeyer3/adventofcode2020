@@ -1,5 +1,4 @@
-use itertools::{Itertools, Combinations};
-use std::borrow::Borrow;
+use itertools::Itertools;
 
 // TODO: not generate the combinations then solve the issue. It would be better to break the the moment the sum is found.
 fn main() {
