@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 struct OutputJoltage(Vec<usize>);
 
 impl OutputJoltage {
@@ -26,51 +28,35 @@ impl OutputJoltage {
         (one_j, three_j)
     }
 
-    fn get_permutations(&mut self) -> usize {
+    fn get_permutations(&mut self) -> isize {
         let perms = 0;
         self.0.push(self.0.last().unwrap() + 3);
         self.0.insert(0, 0);
-        let mut ways_to_get_there = vec![0usize; self.0.len()];
-        ways_to_get_there[0] = 1;
-        for i in 0..self.0.len() {
-            let ways_to_get_here = ways_to_get_there[i];
+        let mut dp: HashMap<isize, isize> = HashMap::new();
+
+        fn dynamic_programming(data: &Vec<usize>, index: usize, dp: &mut HashMap<isize, isize>) -> isize {
+            if index == data.len() - 1 {
+                return 1;
+            }
+            match dp.get(&(index as isize)) {
+                None => {}
+                Some(i) => return *i
+            }
+            let mut ans: isize = 0;
             for j in 1..=3 {
-                if i + j >= self.0.len() || self.0[i + j] - self.0[i] > 3 {
+                if j + index == data.len() {
                     break;
                 }
-                ways_to_get_there[i + j] += ways_to_get_here;
+                if data[j + index] - data[index as usize] <= 3 {
+                    ans += dynamic_programming(data, j + index, dp);
+                }
             }
+            dp.insert(index as isize, ans);
+            return ans;
         }
-        return *ways_to_get_there.last().unwrap()
-    }
-    // // assumes already sorted
-    // // calculations decimated my cpu
-    // fn get_permutations(&mut self) -> i32 {
-    //     //add the device
-    //     self.0.push(self.0.last().unwrap() + 3);
-    //     println!("evaluating array {:?}", self.0);
-    //     return calculate(&self.0, 0, 0, 0, self.0[self.0.len() - 1] as i32);
-    //
-    //     fn calculate(data: &Vec<usize>, mut index: usize, mut last_num: i32, mut perm: i32, last_eval: i32) -> i32 {
-    //         for j in data[index..].iter() {
-    //             // println!("evaluating num: {} - last_num: {}", j, last_num);
-    //             index += 1;
-    //             if *j as i32 - last_num <= 3 {
-    //                 if index == data.len() - 1 {
-    //                     // println!("big money");
-    //                     perm += 1;
-    //                     return perm
-    //                 }
-    //
-    //                 perm = calculate(data, index, *j as i32, perm, last_eval);
-    //                 continue
-    //             }
-    //             return perm
-    //         }
-    //         return perm
-    //     }
-    // }
 
+        return dynamic_programming(&self.0, 0, &mut dp);
+    }
 }
 
 fn main() {
@@ -78,6 +64,6 @@ fn main() {
     let mut output_j = OutputJoltage(input.lines().map(|j| j.parse().unwrap()).collect::<Vec<usize>>());
     let (one_j, three_j) = output_j.get_difference();
     let perm = output_j.get_permutations();
-    println!("pt1: diff 1: {} diff 2: {} result: {}", one_j, three_j, one_j*three_j);
+    println!("pt1: diff 1: {} diff 2: {} result: {}", one_j, three_j, one_j * three_j);
     println!("pt2: perm: {}", perm);
 }
