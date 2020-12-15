@@ -243,39 +243,40 @@ impl Seating {
     }
 }
 
+// TODO: clean up this
 fn main() {
-    // let input = std::fs::read_to_string("input/day11").unwrap();
-    // let mut width = 0;
-    // let mut seats: Vec<Seat> = Vec::new();
-    // for l in input.lines() {
-    //     if width == 0 {
-    //         width = l.len();
-    //     }
-    //     seats.append(&mut l.chars().map(|c| match c {
-    //         'L' => Seat::Empty,
-    //         '.' => Seat::Floor,
-    //         '#' => Seat::Occupied,
-    //         _ => panic!("unknown char")
-    //     }).collect::<Vec<_>>());
-    // }
-    // let mut seating = Seating {
-    //     seats,
-    //     width,
-    // };
-    // println!("starting seating\n{}", seating);
-    // let mut cycles = 0;
-    // loop {
-    //     cycles += 1;
-    //     println!("\n\n\nstarting cycle {}", cycles);
-    //
-    //     let has_changed = seating.occupied();
-    //     println!("{}", seating);
-    //     println!("has changed: {:?}", has_changed);
-    //     if !has_changed {
-    //         break;
-    //     }
-    // }
-    // println!("{:?}", seating.seats.iter().filter(|&f| *f == Seat::Occupied).count())
+    let input = std::fs::read_to_string("input/day11").unwrap();
+    let mut width = 0;
+    let mut seats: Vec<Seat> = Vec::new();
+    for l in input.lines() {
+        if width == 0 {
+            width = l.len();
+        }
+        seats.append(&mut l.chars().map(|c| match c {
+            'L' => Seat::Empty,
+            '.' => Seat::Floor,
+            '#' => Seat::Occupied,
+            _ => panic!("unknown char")
+        }).collect::<Vec<_>>());
+    }
+    let mut seating = Seating {
+        seats,
+        width,
+    };
+    println!("starting seating\n{}", seating);
+    let mut cycles = 0;
+    loop {
+        cycles += 1;
+        println!("\n\n\nstarting cycle {}", cycles);
+
+        let has_changed = seating.occupied();
+        println!("{}", seating);
+        println!("has changed: {:?}", has_changed);
+        if !has_changed {
+            break;
+        }
+    }
+    println!("{:?}", seating.seats.iter().filter(|&f| *f == Seat::Occupied).count())
 
     // pt2
     let input = std::fs::read_to_string("input/day11").unwrap();
@@ -296,15 +297,13 @@ fn main() {
         seats,
         width,
     };
-    // println!("starting seating\n{}", seating);
     let mut cycles = 0;
     loop {
         cycles += 1;
         println!("\n\n\nstarting cycle {}", cycles);
 
         let has_changed = seating.visible_occupied();
-        // println!("{}", seating);
-        // println!("has changed: {:?}", has_changed);
+
         if !has_changed {
             break;
         }
