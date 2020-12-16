@@ -1,9 +1,12 @@
 use std::str::Chars;
 use std::collections::HashMap;
 use lazy_static::lazy_static;
+use std::fmt::Display;
 
 use regex::{Match, Regex};
 use regex::internal::Inst;
+use std::fmt::{Debug, Formatter};
+use std::fmt;
 
 lazy_static! {
     static ref Direction: Vec<Cardinal> = vec![Cardinal::East, Cardinal::South, Cardinal::West, Cardinal::North];
@@ -146,101 +149,58 @@ impl ShipMovement for Instructions {
     }
 }
 
-impl WaypointInstructions{
-    fn get_directions(&self) -> Vec<usize> {
-        let north = self.waypoint.get(&Cardinal::North).unwrap().to_owned();
-        let east = self.waypoint.get(&Cardinal::East).unwrap().to_owned();
-        let south = self.waypoint.get(&Cardinal::South).unwrap().to_owned();
-        let west = self.waypoint.get(&Cardinal::West).unwrap().to_owned();
 
-        vec![north, east, south, west]
-    }
-    fn set_direction(&mut self, directions: Vec<usize>) {
-        *self.waypoint.get_mut(&Cardinal::North).unwrap() = directions[0];
-        *self.waypoint.get_mut(&Cardinal::East).unwrap() = directions[1];
-        *self.waypoint.get_mut(&Cardinal::South).unwrap()= directions[2];
-        *self.waypoint.get_mut(&Cardinal::West).unwrap()= directions[3];
-    }
-    fn _move(&mut self, mut direction1: (Cardinal, usize), mut direction2: (Cardinal, usize), units: usize) -> ((Cardinal, usize), (Cardinal, usize)) {
-        if direction2.1 > units {
-            return (direction1, (direction2.0, direction2.1 - units));
-        }
-        return ((direction1.0, direction1.1 + units), (direction2.0, 0));
-    }
-    fn move_cardinal(&mut self, dir: Cardinal, units: usize) {
-        match dir {
-            Cardinal::North => {
-                let n = self.waypoint
-                    .get_key_value(&Cardinal::North)
-                    .unwrap();
-                let s = self.waypoint
-                    .get_key_value(&Cardinal::North)
-                    .unwrap();
-                let dirs = ((n.0.to_owned(), n.1.to_owned()), (
-                    n.1.to_owned(), n.1.to_owned()));
-                *self.waypoint.
+fn pt2(input: &str) -> usize {
+    let mut ship: [usize; 4] = [0; 4];
+    let mut waypoint: [usize; 4] = [1, 10, 0, 0];
+    println!("starting\n\nwaypoint {:?}", waypoint);
+    println!("ship {:?}", ship);
+    for line in input.lines() {
+        let (action, val) = line.split_at(1);
+        let num = val.parse::<usize>().unwrap();
+        println!("action {:?}{:?}", action, num);
+        match action {
+            "N" => waypoint[0] += num,
+            "E" => waypoint[1] += num,
+            "S" => waypoint[2] += num,
+            "W" => waypoint[3] += num,
+            "R" => {
+                let turn = (num / 90);
+                waypoint.rotate_right(turn);
             }
-            Cardinal::South => {}
-            Cardinal::East => {}
-            Cardinal::West => {}
+            "L" => {
+                let turn = (num / 90);
+                waypoint.rotate_left(turn);
+            }
+            "F" => {
+                for (i, v) in waypoint.iter().enumerate() {
+                    ship[i] += *v * num;
+                }
+                // let n = waypoint[0] as i32 - waypoint[2] as i32;
+                // println!("n {:?}", n);
+                // if n > 0 {
+                //     ship[0] += n as usize * num;
+                // } else {
+                //     ship[2] += n.abs() as usize * num;
+                // }
+                // let e = waypoint[1] as i32 - waypoint[3] as i32;
+                // println!("e {:?}", e);
+                // if e > 0 {
+                //     ship[1] += e as usize * num;
+                // } else {
+                //     ship[3] += e.abs() as usize * num;
+                // }
+
+            }
+            &_ => {}
         }
+        println!("\n\nwaypoint {:?}", waypoint);
+        println!("ship {:?}", ship);
     }
+    return ((ship[0] as i32 - ship[2] as i32).abs() +
+        (ship[1] as i32 - ship[3] as i32).abs()) as usize
 }
 
-impl ShipMovement for WaypointInstructions {
-    fn new() -> Self {
-        let mut route = HashMap::new();
-        route.insert(Cardinal::North, 0);
-        route.insert(Cardinal::South, 0);
-        route.insert(Cardinal::East, 0);
-        route.insert(Cardinal::West, 0);
-        let mut waypoint = route.clone();
-        WaypointInstructions{
-            inst: Vec::new(),
-            ship_route: route,
-            waypoint,
-        }
-    }
-
-    fn navigate(&mut self) {
-        unimplemented!()
-    }
-
-    fn turn_left(&mut self, degrees: usize) {
-        let turns: i32 = ((degrees as i32 / 90) / -1) as i32;
-        let mut directions = self.get_directions().clone();
-        directions.rotate_left(turns as usize);
-        self.set_direction(directions);
-    }
-    fn turn_right(&mut self, degrees: usize) {
-        let turns: i32 = ((degrees as i32 / 90) / -1) as i32;
-        let mut directions = self.get_directions();
-        directions.rotate_right(turns as usize);
-        self.set_direction(directions);
-    }
-
-    // moves the ship to the waypoint 10 times, keeps waypoint at location
-    fn forward(&mut self, units: usize) {
-        for (waypoint_dir, waypoint_units) in self.waypoint.clone().iter() {
-            match waypoint_dir {
-                Cardinal::North => {
-                    *self.ship_route.get_mut(&Cardinal::North).unwrap() += (waypoint_units * units);
-                }
-                Cardinal::South => {
-                    *self.ship_route.get_mut(&Cardinal::South).unwrap() += (waypoint_units * units);
-                }
-                Cardinal::East => {
-                    *self.ship_route.get_mut(&Cardinal::East).unwrap() += (waypoint_units * units);
-                }
-                Cardinal::West => {
-                    *self.ship_route.get_mut(&Cardinal::West).unwrap() += (waypoint_units * units);
-                }
-            }
-        }
-    }
-
-
-}
 
 fn main() {
     let input = std::fs::read_to_string("input/day12").unwrap();
@@ -287,8 +247,9 @@ fn main() {
         (*nav.route.get(&Cardinal::North).unwrap() as i32 -
         *nav.route.get(&Cardinal::South).unwrap() as i32).abs() +
         (*nav.route.get(&Cardinal::East).unwrap() as i32 -
-            *nav.route.get(&Cardinal::West).unwrap() as i32).abs()))
+            *nav.route.get(&Cardinal::West).unwrap() as i32).abs()));
 
     // pt2.
+    println!("{:?}", pt2(&input));
 
 }
